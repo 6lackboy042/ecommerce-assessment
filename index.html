@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bandage Ecommerce Landing Page</title>
+    <style>
+      :root {
+        --blue: #23a6f0;
+        --green: #23856d;
+        --muted: #737373;
+        --text: #252b42;
+        color: var(--text);
+        font-family: Montserrat, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f4f4f4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      .page {
+        background: white;
+        margin: 0 auto;
+        max-width: 1439px;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .promo-bar {
+        align-items: center;
+        background: var(--green);
+        color: white;
+        display: flex;
+        font-size: 14px;
+        font-weight: 700;
+        justify-content: space-between;
+        height: 58px;
+        padding: 0 36px;
+      }
+
+      .inline-row,
+      .nav-links,
+      .nav-actions,
+      .social-row,
+      .post-tags,
+      .post-meta {
+        align-items: center;
+        display: flex;
+        gap: 15px;
+      }
+
+      .icon-img {
+        display: inline-block;
+        height: 16px;
+        object-fit: contain;
+        width: 16px;
+      }
+
+      .site-nav {
+        align-items: center;
+        border-bottom: 0;
+        display: flex;
+        height: 78px;
+        padding: 0 39px;
+      }
+
+      .brand {
+        color: var(--text);
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1;
+        margin-right: 166px;
+      }
+
+      .nav-links {
+        flex: 1;
+        gap: 21px;
+      }
+
+      .nav-links a,
+      .nav-actions a {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .nav-actions a,
+      .nav-actions button {
+        color: var(--blue);
+        font-size: 14px;
+      }
+
+      .nav-actions button {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-weight: 800;
+        padding: 0;
+      }
+
+      .icon-button {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+      }
+
+      .nav-actions {
+        gap: 22px;
+      }
+
+      .mobile-menu {
+        display: none;
+      }
+
+      .category-section {
+        padding: 88px 147px 80px;
+      }
+
+      .category-grid {
+        display: grid;
+        gap: 15px;
+        grid-template-columns: 453px 332px 332px;
+        grid-template-rows: 300px 300px;
+        justify-content: center;
+      }
+
+      .category-tile {
+        overflow: hidden;
+      }
+
+      .category-tile img {
+        height: 100%;
+        object-fit: fill;
+        width: 100%;
+      }
+
+      .tile-large {
+        grid-row: 1 / 3;
+      }
+
+      .tile-wide {
+        grid-column: 2 / 4;
+      }
+
+      .section {
+        padding: 88px 0 80px;
+      }
+
+      .products-section {
+        min-height: 1241px;
+      }
+
+      .section-title {
+        margin: 0 auto 56px;
+        max-width: 520px;
+        text-align: center;
+      }
+
+      .section-title span {
+        color: var(--muted);
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .section-title .blue-label {
+        color: var(--blue);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .section-title h2 {
+        color: var(--text);
+        font-size: 24px;
+        letter-spacing: 0.2px;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+      }
+
+      .section-title p {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .product-grid {
+        display: grid;
+        gap: 58px 30px;
+        grid-template-columns: repeat(5, 183px);
+        justify-content: center;
+      }
+
+      .product-card {
+        text-align: center;
+      }
+
+      .product-card img {
+        height: 238px;
+        object-fit: cover;
+        width: 183px;
+      }
+
+      .product-card h3 {
+        font-size: 16px;
+        margin: 24px 0 10px;
+      }
+
+      .product-card p {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+
+      .price-row {
+        color: #bdbdbd;
+        display: flex;
+        font-weight: 800;
+        gap: 6px;
+        justify-content: center;
+      }
+
+      .price-row strong {
+        color: var(--green);
+      }
+
+      .load-more {
+        background: white;
+        border: 1px solid var(--blue);
+        border-radius: 5px;
+        color: var(--blue);
+        display: block;
+        font-size: 14px;
+        font-weight: 800;
+        margin: 78px auto 0;
+        min-height: 52px;
+        min-width: 261px;
+        text-transform: uppercase;
+      }
+
+      .services-section {
+        min-height: 632px;
+        padding-top: 83px;
+      }
+
+      .services-grid {
+        display: grid;
+        gap: 42px;
+        grid-template-columns: repeat(3, 1fr);
+        margin: 118px auto 0;
+        max-width: 1046px;
+        text-align: center;
+      }
+
+      .service-icon {
+        color: var(--blue);
+        display: block;
+        font-size: 58px;
+        line-height: 1;
+        margin-bottom: 24px;
+      }
+
+      .service-card h3 {
+        font-size: 24px;
+        margin: 0 0 12px;
+      }
+
+      .service-card p {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 auto;
+        max-width: 235px;
+      }
+
+      .posts-section {
+        min-height: 994px;
+        padding-top: 114px;
+      }
+
+      .posts-section .section-title h2 {
+        font-size: 40px;
+        text-transform: none;
+      }
+
+      .posts-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, 348px);
+        justify-content: center;
+      }
+
+      .post-card {
+        border: 1px solid #ececec;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .post-image {
+        height: 301px;
+        position: relative;
+      }
+
+      .post-image img {
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+      }
+
+      .new-badge {
+        background: #e74040;
+        border-radius: 3px;
+        color: white;
+        font-size: 14px;
+        font-weight: 800;
+        left: 20px;
+        padding: 2px 11px;
+        position: absolute;
+        text-transform: uppercase;
+        top: 20px;
+      }
+
+      .post-content {
+        padding: 24px 25px 34px;
+      }
+
+      .post-tags,
+      .post-meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .post-tags span:first-child {
+        color: var(--blue);
+      }
+
+      .post-card h3 {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 1.35;
+        margin: 12px 0;
+      }
+
+      .post-card p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+        margin: 0 0 20px;
+      }
+
+      .post-meta {
+        justify-content: space-between;
+        margin-bottom: 22px;
+      }
+
+      .post-card a {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .testimonial-section {
+        align-items: center;
+        display: grid;
+        gap: 88px;
+        grid-template-columns: 438px 464px;
+        justify-content: center;
+        min-height: 682px;
+        padding: 80px 0;
+      }
+
+      .testimonial-card {
+        text-align: center;
+      }
+
+      .testimonial-card h2 {
+        font-size: 24px;
+        margin: 0 0 58px;
+      }
+
+      .avatar {
+        border-radius: 999px;
+        height: 88px;
+        margin: 0 auto 22px;
+        object-fit: cover;
+        width: 88px;
+      }
+
+      .stars {
+        color: #f3cd03;
+        font-size: 24px;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+      }
+
+      .testimonial-card p {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0 auto 18px;
+        max-width: 360px;
+      }
+
+      .testimonial-card strong {
+        color: var(--blue);
+        display: block;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .testimonial-card span {
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .gallery-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(3, 144px);
+      }
+
+      .gallery-grid img {
+        height: 108px;
+        object-fit: cover;
+        width: 144px;
+      }
+
+      .cta-section {
+        position: relative;
+      }
+
+      .cta-section img {
+        width: 100%;
+      }
+
+      .site-footer {
+        min-height: 488px;
+      }
+
+      .footer-top {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        margin: 0 auto;
+        max-width: 1050px;
+        padding: 52px 0;
+      }
+
+      .footer-top .brand {
+        margin-right: 0;
+      }
+
+      .footer-social a {
+        align-items: center;
+        color: var(--blue);
+        display: inline-flex;
+        font-size: 22px;
+        font-weight: 800;
+        justify-content: center;
+      }
+
+      .footer-social .icon-img {
+        filter: brightness(0) saturate(100%) invert(57%) sepia(99%) saturate(2187%) hue-rotate(166deg) brightness(101%) contrast(88%);
+      }
+
+      .footer-links {
+        border-top: 1px solid #ececec;
+        display: grid;
+        gap: 30px;
+        grid-template-columns: 148px 148px 148px 148px 321px;
+        justify-content: center;
+        padding: 56px 0;
+      }
+
+      .footer-links h3 {
+        font-size: 16px;
+        margin: 0 0 18px;
+      }
+
+      .footer-links a,
+      .subscribe-form span {
+        color: var(--muted);
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .subscribe-form div {
+        display: flex;
+      }
+
+      .subscribe-form input {
+        border: 1px solid #e6e6e6;
+        border-radius: 5px 0 0 5px;
+        min-height: 58px;
+        padding: 0 18px;
+        width: 205px;
+      }
+
+      .subscribe-form button {
+        background: var(--blue);
+        border: 0;
+        border-radius: 0 5px 5px 0;
+        color: white;
+        padding: 0 22px;
+      }
+
+      .copyright {
+        background: #fafafa;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        padding: 24px 195px;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          background: white;
+        }
+
+        .page {
+          max-width: 414px;
+        }
+
+        .promo-bar {
+          display: none;
+        }
+
+        .site-nav {
+          justify-content: space-between;
+          min-height: 76px;
+          padding: 0 35px;
+        }
+
+        .brand {
+          font-size: 24px;
+          margin-right: 0;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .nav-actions {
+          gap: 22px;
+        }
+
+        .nav-actions a {
+          display: none;
+        }
+
+        .nav-actions button {
+          color: var(--text);
+          font-size: 24px;
+          padding: 0;
+        }
+
+        .nav-actions .icon-button span {
+          display: none;
+        }
+
+        .nav-actions .icon-img {
+          height: 18px;
+          width: 18px;
+        }
+
+        .nav-actions .love-button {
+          display: none;
+        }
+
+        .mobile-menu {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+          padding: 80px 0 72px;
+        }
+
+        .mobile-menu a {
+          color: var(--muted);
+          font-size: 30px;
+          font-weight: 500;
+        }
+
+        .category-section {
+          padding: 0 42px 98px;
+        }
+
+        .category-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .category-tile {
+          height: 300px;
+          width: 330px;
+        }
+
+        .section {
+          padding: 0 0 82px;
+        }
+
+        .products-section {
+          min-height: auto;
+        }
+
+        .products-section .section-title {
+          max-width: 270px;
+        }
+
+        .products-section .section-title span {
+          display: none;
+        }
+
+        .section-title h2 {
+          font-size: 24px;
+          line-height: 1.35;
+        }
+
+        .product-grid {
+          gap: 42px;
+          grid-template-columns: 295px;
+        }
+
+        .product-card img {
+          height: 384px;
+          width: 295px;
+        }
+
+        .services-section {
+          min-height: auto;
+          padding: 82px 38px 0;
+        }
+
+        .services-grid {
+          gap: 92px;
+          grid-template-columns: 1fr;
+          margin-top: 84px;
+        }
+
+        .posts-section {
+          min-height: auto;
+          padding-top: 170px;
+        }
+
+        .posts-section .section-title h2 {
+          font-size: 40px;
+          line-height: 1.15;
+        }
+
+        .posts-grid {
+          grid-template-columns: 330px;
+        }
+
+        .post-image {
+          height: 300px;
+        }
+
+        .testimonial-section {
+          gap: 52px;
+          grid-template-columns: 1fr;
+          min-height: auto;
+          padding: 96px 38px 76px;
+        }
+
+        .testimonial-card h2 {
+          line-height: 1.35;
+          margin-inline: auto;
+          max-width: 260px;
+        }
+
+        .testimonial-card p {
+          max-width: 260px;
+        }
+
+        .gallery-grid {
+          gap: 12px;
+          grid-template-columns: repeat(3, 92px);
+          justify-content: center;
+        }
+
+        .gallery-grid img {
+          height: 92px;
+          width: 92px;
+        }
+
+        .cta-section {
+          height: 712px;
+          overflow: hidden;
+        }
+
+        .cta-section img {
+          height: 100%;
+          object-fit: cover;
+          object-position: center top;
+        }
+
+        .footer-top {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 22px;
+          padding: 45px 44px;
+        }
+
+        .footer-links {
+          border-top: 0;
+          gap: 26px;
+          grid-template-columns: 1fr;
+          padding: 40px 44px 24px;
+        }
+
+        .subscribe-form div {
+          flex-direction: column;
+        }
+
+        .subscribe-form input,
+        .subscribe-form button {
+          border-radius: 5px;
+          min-height: 46px;
+          width: 100%;
+        }
+
+        .copyright {
+          padding: 26px 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <div class="promo-bar">
+          <div class="inline-row">
+            <span>☎ (225) 555-0118</span>
+            <span>✉ michelle.rivera@example.com</span>
+          </div>
+          <strong>Follow Us and get a chance to win 80% off</strong>
+          <div class="inline-row">
+            <span>Follow Us :</span>
+            <img class="icon-img" src="./assets/icons/instagram.png" alt="Instagram" />
+            <img class="icon-img" src="./assets/icons/youtube.png" alt="YouTube" />
+            <img class="icon-img" src="./assets/icons/facebook.png" alt="Facebook" />
+            <img class="icon-img" src="./assets/icons/twitter.png" alt="Twitter" />
+          </div>
+        </div>
+        <nav class="site-nav">
+          <a href="#" class="brand">Bandage</a>
+          <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#shop">Shop⌄</a>
+            <a href="#services">About</a>
+            <a href="#blog">Blog</a>
+            <a href="#footer">Contact</a>
+            <a href="#footer">Pages</a>
+          </div>
+          <div class="nav-actions">
+            <a href="#">♙ Login / Register</a>
+            <button type="button" aria-label="Search">⌕</button>
+            <button class="icon-button" type="button" aria-label="Cart">
+              <img class="icon-img" src="./assets/icons/cart.png" alt="" />
+              <span>1</span>
+            </button>
+            <button class="icon-button love-button" type="button" aria-label="Wishlist">
+              <img class="icon-img" src="./assets/icons/love.png" alt="" />
+              <span>1</span>
+            </button>
+            <button type="button" aria-label="Menu">☰</button>
+          </div>
+        </nav>
+        <div class="mobile-menu">
+          <a href="#">Home</a>
+          <a href="#products">Product</a>
+          <a href="#products">Pricing</a>
+          <a href="#footer">Contact</a>
+        </div>
+      </header>
+
+      <section class="category-section" id="shop">
+        <div class="category-grid">
+          <article class="category-tile tile-large"><img src="./assets/category-1.png" alt="Furniture tableware category" /></article>
+          <article class="category-tile tile-wide"><img src="./assets/category-2.png" alt="Furniture planter category" /></article>
+          <article class="category-tile"><img src="./assets/category-3.png" alt="Furniture pendant lamp category" /></article>
+          <article class="category-tile"><img src="./assets/category-4.png" alt="Furniture ceramics category" /></article>
+        </div>
+      </section>
+
+      <section class="section products-section" id="products">
+        <div class="section-title">
+          <span>Featured Products</span>
+          <h2>Bestseller Products</h2>
+          <p>Problems trying to resolve the conflict between</p>
+        </div>
+        <div class="product-grid">
+          <article class="product-card"><img src="./assets/product-1.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-2.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-3.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-4.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-5.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-6.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-7.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-8.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-9.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+          <article class="product-card"><img src="./assets/product-10.png" alt="" /><h3>Graphic Design</h3><p>English Department</p><div class="price-row"><span>$16.48</span><strong>$6.48</strong></div></article>
+        </div>
+        <button class="load-more" type="button">Load More Products</button>
+      </section>
+
+      <section class="section services-section" id="services">
+        <div class="section-title">
+          <span>Featured Products</span>
+          <h2>The Best Services</h2>
+          <p>Problems trying to resolve the conflict between</p>
+        </div>
+        <div class="services-grid">
+          <article class="service-card"><span class="service-icon">▰</span><h3>Easy Wins</h3><p>Get your best looking smile now!</p></article>
+          <article class="service-card"><span class="service-icon">▣</span><h3>Concrete</h3><p>Defalcate is most focused in helping you discover your most beautiful smile.</p></article>
+          <article class="service-card"><span class="service-icon">↗</span><h3>Hack Growth</h3><p>Overcame any hurdle or any other problem.</p></article>
+        </div>
+      </section>
+
+      <section class="section posts-section" id="blog">
+        <div class="section-title">
+          <span class="blue-label">Practice Advice</span>
+          <h2>Featured Posts</h2>
+        </div>
+        <div class="posts-grid">
+          <article class="post-card">
+            <div class="post-image"><span class="new-badge">New</span><img src="./assets/post-1.png" alt="" /></div>
+            <div class="post-content"><div class="post-tags"><span>Google</span><span>Trending</span><span>New</span></div><h3>Loudest a la Madison #1 (L'integral)</h3><p>We focus on ergonomics and meeting you where you work. It's only a keystroke away.</p><div class="post-meta"><span>◴ 22 April 2021</span><span>▰ 10 comments</span></div><a href="#">Learn More ›</a></div>
+          </article>
+          <article class="post-card">
+            <div class="post-image"><span class="new-badge">New</span><img src="./assets/post-2.png" alt="" /></div>
+            <div class="post-content"><div class="post-tags"><span>Google</span><span>Trending</span><span>New</span></div><h3>Loudest a la Madison #1 (L'integral)</h3><p>We focus on ergonomics and meeting you where you work. It's only a keystroke away.</p><div class="post-meta"><span>◴ 22 April 2021</span><span>▰ 10 comments</span></div><a href="#">Learn More ›</a></div>
+          </article>
+          <article class="post-card">
+            <div class="post-image"><span class="new-badge">New</span><img src="./assets/post-3.png" alt="" /></div>
+            <div class="post-content"><div class="post-tags"><span>Google</span><span>Trending</span><span>New</span></div><h3>Loudest a la Madison #1 (L'integral)</h3><p>We focus on ergonomics and meeting you where you work. It's only a keystroke away.</p><div class="post-meta"><span>◴ 22 April 2021</span><span>▰ 10 comments</span></div><a href="#">Learn More ›</a></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="testimonial-section">
+        <article class="testimonial-card">
+          <h2>What they say about us</h2>
+          <img class="avatar" src="./assets/avatar.png" alt="Regina Miles" />
+          <div class="stars">★★★★☆</div>
+          <p>Slate helps you see how many more days you need to work to reach your financial goal.</p>
+          <strong>Regina Miles</strong>
+          <span>Designer</span>
+        </article>
+        <div class="gallery-grid">
+          <img src="./assets/gallery-1.png" alt="" /><img src="./assets/gallery-2.png" alt="" /><img src="./assets/gallery-3.png" alt="" />
+          <img src="./assets/gallery-4.png" alt="" /><img src="./assets/gallery-5.png" alt="" /><img src="./assets/gallery-6.png" alt="" />
+          <img src="./assets/gallery-7.png" alt="" /><img src="./assets/gallery-8.png" alt="" /><img src="./assets/gallery-9.png" alt="" />
+        </div>
+      </section>
+
+      <section class="cta-section"><img src="./assets/cta.png" alt="Call to action" /></section>
+
+      <footer class="site-footer" id="footer">
+        <div class="footer-top">
+          <a href="#" class="brand">Bandage</a>
+          <div class="social-row footer-social">
+            <a href="#" aria-label="Facebook"><img class="icon-img" src="./assets/icons/facebook.png" alt="" /></a>
+            <a href="#" aria-label="Instagram"><img class="icon-img" src="./assets/icons/instagram.png" alt="" /></a>
+            <a href="#" aria-label="Twitter"><img class="icon-img" src="./assets/icons/twitter.png" alt="" /></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <div><h3>Company Info</h3><a href="#">About Us</a><a href="#">Carrier</a><a href="#">We are hiring</a><a href="#">Blog</a></div>
+          <div><h3>Legal</h3><a href="#">About Us</a><a href="#">Carrier</a><a href="#">We are hiring</a><a href="#">Blog</a></div>
+          <div><h3>Features</h3><a href="#">Business Marketing</a><a href="#">User Analytic</a><a href="#">Live Chat</a><a href="#">Unlimited Support</a></div>
+          <div><h3>Resources</h3><a href="#">IOS & Android</a><a href="#">Watch a Demo</a><a href="#">Customers</a><a href="#">API</a></div>
+          <form class="subscribe-form"><h3>Get In Touch</h3><div><input type="email" placeholder="Your Email" /><button type="button">Subscribe</button></div><span>Lore imp sum dolor Amit</span></form>
+        </div>
+        <p class="copyright">Made With Love By Finland All Right Reserved</p>
+      </footer>
+    </main>
+  </body>
+</html>
