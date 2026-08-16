@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { addToCart, decreaseQuantity, removeFromCart } from './features/cart/cartSlice';
-import { useGetProductsQuery } from './features/products/productsApi';
+import { useDeleteCartMutation, useGetCartsByUserQuery } from './features/carts/cartsApi';
+import {
+  useGetProductCategoryListQuery,
+  useGetProductQuery,
+  useGetProductsByCategoryQuery,
+  useGetProductsQuery,
+} from './features/products/productsApi';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import type { Product } from './types/product';
 
@@ -13,7 +19,12 @@ import ctaImage from '../assets/cta.png';
 import facebookIcon from '../assets/icons/facebook.png';
 import instagramIcon from '../assets/icons/instagram.png';
 import cartIcon from '../assets/icons/cart.png';
+import concreteIcon from '../assets/icons/concrete.png';
+import easyWinIcon from '../assets/icons/easy-win.png';
+import eyeIcon from '../assets/icons/eye.png';
+import hackGrowthIcon from '../assets/icons/hack-growth.png';
 import loveIcon from '../assets/icons/love.png';
+import searchIcon from '../assets/icons/search.png';
 import twitterIcon from '../assets/icons/twitter.png';
 import youtubeIcon from '../assets/icons/youtube.png';
 import butterflyLogo from '../assets/brands/butterfly.png';
@@ -88,16 +99,45 @@ type SelectedProduct = {
 
 type PageView = 'landing' | 'detail' | 'cart';
 
+type DisplayCartItem = Pick<
+  Product,
+  'id' | 'title' | 'price' | 'discountPercentage' | 'thumbnail' | 'images'
+> & {
+  quantity: number;
+  discountedTotal?: number;
+  source: 'api' | 'local';
+  total?: number;
+};
+
+function formatCategory(category: string) {
+  return category
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 function Header({
   onHome,
   onCart,
+  searchQuery,
+  selectedCategory,
+  onSearchChange,
+  onCategoryChange,
 }: {
   onHome: () => void;
   onCart: () => void;
+  searchQuery: string;
+  selectedCategory: string;
+  onSearchChange: (query: string) => void;
+  onCategoryChange: (category: string) => void;
 }) {
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartCount = useAppSelector((state) =>
     state.cart.items.reduce((count, item) => count + item.quantity, 0),
   );
+  const { data: categories = [] } = useGetProductCategoryListQuery();
+  const visibleCategories = categories.slice(0, 8);
 
   return (
     <header>
@@ -120,7 +160,20 @@ function Header({
         <button className="brand brand-button" onClick={onHome}>Bandage</button>
         <div className="nav-links">
           <button onClick={onHome}>Home</button>
-          <a href="#products">Shop⌄</a>
+          <div className="shop-menu">
+            <a href="#products">Shop⌄</a>
+            <div className="shop-menu-list" aria-label="Product categories">
+              {visibleCategories.map((category) => (
+                <a
+                  href="#products"
+                  key={category}
+                  onClick={() => onCategoryChange(category)}
+                >
+                  {formatCategory(category)}
+                </a>
+              ))}
+            </div>
+          </div>
           <a href="#services">About</a>
           <a href="#blog">Blog</a>
           <a href="#footer">Contact</a>
@@ -128,7 +181,16 @@ function Header({
         </div>
         <div className="nav-actions">
           <a href="#top">♙ Login / Register</a>
-          <button aria-label="Search">⌕</button>
+          <label className="search-control">
+            <img src={searchIcon} alt="" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={selectedCategory ? formatCategory(selectedCategory) : 'Search'}
+              aria-label="Search products"
+            />
+          </label>
           <button className="action-with-count" onClick={onCart} aria-label="Cart">
             <img src={cartIcon} alt="" />
             <span>{cartCount}</span>
@@ -138,21 +200,51 @@ function Header({
             <span>1</span>
           </button>
         </div>
-        <div className="mobile-icons" aria-hidden="true">
-          <span>⌕</span>
+        <div className="mobile-icons">
+          <button
+            type="button"
+            onClick={() => setIsMobileSearchOpen((isOpen) => !isOpen)}
+            aria-label="Search products"
+            aria-expanded={isMobileSearchOpen}
+          >
+            <img src={searchIcon} alt="" />
+          </button>
           <button onClick={onCart} aria-label="Cart">
             <img src={cartIcon} alt="" />
           </button>
-          <span>☰</span>
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+            aria-label="Open mobile navigation"
+            aria-expanded={isMobileMenuOpen}
+          >
+            ☰
+          </button>
         </div>
       </nav>
 
-      <div className="mobile-menu" aria-label="Mobile navigation">
-        <a href="#top">Home</a>
-        <a href="#products">Product</a>
-        <a href="#services">Pricing</a>
-        <a href="#footer">Contact</a>
-      </div>
+      {isMobileSearchOpen && (
+        <label className="mobile-search-control">
+          <img src={searchIcon} alt="" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={selectedCategory ? formatCategory(selectedCategory) : 'Search products'}
+            aria-label="Search products"
+            autoFocus
+          />
+        </label>
+      )}
+
+      {isMobileMenuOpen && (
+        <div className="mobile-menu" aria-label="Mobile navigation">
+          <a href="#top" onClick={() => setIsMobileMenuOpen(false)}>Home</a>
+          <a href="#products" onClick={() => setIsMobileMenuOpen(false)}>Product</a>
+          <a href="#services" onClick={() => setIsMobileMenuOpen(false)}>Pricing</a>
+          <a href="#footer" onClick={() => setIsMobileMenuOpen(false)}>Contact</a>
+        </div>
+      )}
     </header>
   );
 }
@@ -199,6 +291,10 @@ function ProductCard({
   image: string;
   onSelect: (selectedProduct: SelectedProduct) => void;
 }) {
+  const oldPrice = product.discountPercentage
+    ? product.price / (1 - product.discountPercentage / 100)
+    : product.price + 10;
+
   return (
     <article className="product-card">
       <button
@@ -209,9 +305,9 @@ function ProductCard({
         <img src={image} alt={product.title} />
       </button>
       <h3>{product.title || 'Graphic Design'}</h3>
-      <p>{product.category || 'English Department'}</p>
+      <p>{formatCategory(product.category || 'English Department')}</p>
       <div className="price-row">
-        <span>$16.48</span>
+        <span>${oldPrice.toFixed(2)}</span>
         <strong>${product.price.toFixed(2)}</strong>
       </div>
     </article>
@@ -220,40 +316,64 @@ function ProductCard({
 
 function ProductSection({
   onSelectProduct,
+  searchQuery,
+  selectedCategory,
 }: {
   onSelectProduct: (selectedProduct: SelectedProduct) => void;
+  searchQuery: string;
+  selectedCategory: string;
 }) {
-  const { data, isLoading, isError } = useGetProductsQuery();
-  const products =
-    data?.products?.slice(0, 10).map((product, index) => ({
-      ...product,
-      title: index % 2 === 0 ? 'Graphic Design' : product.title,
-      category: 'English Department',
-      price: 6.48,
-    })) ?? fallbackProducts;
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const {
+    data: productsData,
+    isLoading: isProductsLoading,
+    isError: isProductsError,
+  } = useGetProductsQuery(normalizedQuery, { skip: Boolean(selectedCategory) });
+  const {
+    data: categoryProductsData,
+    isLoading: isCategoryProductsLoading,
+    isError: isCategoryProductsError,
+  } = useGetProductsByCategoryQuery(selectedCategory, { skip: !selectedCategory });
+  const data = selectedCategory ? categoryProductsData : productsData;
+  const isLoading = selectedCategory ? isCategoryProductsLoading : isProductsLoading;
+  const isError = selectedCategory ? isCategoryProductsError : isProductsError;
+  const products = data?.products ?? [];
+  const visibleProducts = products
+    .slice(0, 10)
+    .map((product) => ({
+      product,
+      image: product.thumbnail ?? product.images?.[0],
+    }))
+    .filter((item): item is { product: Product; image: string } =>
+      Boolean(item.image),
+    );
 
   return (
     <section className="section products-section" id="products">
       <SectionTitle
         eyebrow="Featured Products"
-        title="Bestseller Products"
+        title={selectedCategory ? formatCategory(selectedCategory) : 'Bestseller Products'}
         description="Problems trying to resolve the conflict between"
       />
       <div className="api-state" aria-live="polite">
         {isLoading && 'Loading products...'}
         {isError && 'Showing saved products while the API is unavailable.'}
       </div>
-      <div className="product-grid">
-        {products.map((product, index) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            image={productImages[index]}
-            onSelect={onSelectProduct}
-          />
-        ))}
-      </div>
-      <button className="load-button">Load More Products</button>
+      {visibleProducts.length > 0 ? (
+        <div className="product-grid">
+          {visibleProducts.map(({ product, image }) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              image={image}
+              onSelect={onSelectProduct}
+            />
+          ))}
+        </div>
+      ) : !isLoading ? (
+        <p className="empty-search">No products match “{searchQuery}”.</p>
+      ) : null}
+      {!searchQuery && <button className="load-button">Load More Products</button>}
     </section>
   );
 }
@@ -268,17 +388,31 @@ function ProductDetailPage({
   onOpenCart: () => void;
 }) {
   const dispatch = useAppDispatch();
-  const relatedProducts = fallbackProducts.slice(0, 8);
-  const relatedImages = [
-    productSix,
-    productEight,
-    productSeven,
-    productTen,
-    productNine,
-    productFive,
-    productSix,
-    productEight,
-  ];
+  const {
+    data: singleProduct,
+    isLoading: isProductLoading,
+    isError: isProductError,
+  } = useGetProductQuery(selectedProduct.product.id);
+  const {
+    data: bestsellerProductsData,
+    isLoading: isBestsellerProductsLoading,
+    isError: isBestsellerProductsError,
+  } = useGetProductsQuery();
+  const detailProduct = singleProduct ?? selectedProduct.product;
+  const detailImage =
+    detailProduct.thumbnail ?? detailProduct.images?.[0] ?? selectedProduct.image;
+  const detailThumbnails =
+    detailProduct.images && detailProduct.images.length > 0
+      ? detailProduct.images.slice(0, 2)
+      : [productTwo, productFive];
+  const bestsellerProducts = (bestsellerProductsData?.products ?? [])
+    .filter((product) => product.id !== detailProduct.id)
+    .slice(0, 8)
+    .map((product) => ({
+      product,
+      image: product.thumbnail ?? product.images?.[0],
+    }))
+    .filter((item): item is { product: Product; image: string } => Boolean(item.image));
 
   return (
     <main className="product-detail-page">
@@ -292,24 +426,34 @@ function ProductDetailPage({
         <div className="product-gallery">
           <div className="main-product-image">
             <button aria-label="Previous product image">‹</button>
-            <img src={selectedProduct.image} alt={selectedProduct.product.title} />
+            <img src={detailImage} alt={detailProduct.title} />
             <button aria-label="Next product image">›</button>
           </div>
           <div className="thumbnail-row">
-            <img src={productTwo} alt="Product thumbnail" />
-            <img src={productFive} alt="Product thumbnail" />
+            {detailThumbnails.map((image) => (
+              <img key={image} src={image} alt={`${detailProduct.title} thumbnail`} />
+            ))}
           </div>
         </div>
 
         <div className="product-summary">
-          <h1>Floating Phone</h1>
+          <h1>{detailProduct.title}</h1>
+          <div className="detail-api-state" aria-live="polite">
+            {isProductLoading && 'Loading product details...'}
+            {isProductError && 'Showing selected product details while the API is unavailable.'}
+          </div>
           <div className="rating-row">
             <span>★ ★ ★ ★ ☆</span>
-            <strong>10 Reviews</strong>
+            <strong>{detailProduct.rating?.toFixed(1) ?? '4.8'} Reviews</strong>
           </div>
-          <div className="detail-price">$1,139.33</div>
+          <div className="detail-price">${detailProduct.price.toFixed(2)}</div>
           <p className="stock-line">
-            Availability : <strong>In Stock</strong>
+            Availability :{' '}
+            <strong>{(detailProduct.stock ?? 1) > 0 ? 'In Stock' : 'Out of Stock'}</strong>
+          </p>
+          <p className="mobile-detail-copy">
+            {detailProduct.description ??
+              'Met minim Mollie non desert Alamo est sit cliquey dolor do met sent. RELIT official consequent door ENIM RELIT Mollie. Excitation venial consequent sent nostrum met.'}
           </p>
           <hr />
           <div className="color-row" aria-label="Available colors">
@@ -322,7 +466,7 @@ function ProductDetailPage({
             <button
               className="select-options"
               onClick={() => {
-                dispatch(addToCart(selectedProduct.product));
+                dispatch(addToCart(detailProduct));
                 onOpenCart();
               }}
             >
@@ -334,13 +478,15 @@ function ProductDetailPage({
             <button
               aria-label="Add to cart"
               onClick={() => {
-                dispatch(addToCart(selectedProduct.product));
+                dispatch(addToCart(detailProduct));
                 onOpenCart();
               }}
             >
               <img src={cartIcon} alt="" />
             </button>
-            <button aria-label="Preview product">●</button>
+            <button className="preview-button" aria-label="Preview product">
+              <img src={eyeIcon} alt="" />
+            </button>
           </div>
         </div>
       </section>
@@ -355,9 +501,8 @@ function ProductDetailPage({
           <article>
             <h2>the quick fox jumps over</h2>
             <p>
-              Met minim Mollie non desert Alamo est sit cliquey dolor do met sent.
-              RELIT official consequent door ENIM RELIT Mollie. Excitation venial
-              consequent sent nostrum met.
+              {detailProduct.description ??
+                'Met minim Mollie non desert Alamo est sit cliquey dolor do met sent. RELIT official consequent door ENIM RELIT Mollie. Excitation venial consequent sent nostrum met.'}
             </p>
             <p className="accent-copy">
               Met minim Mollie non desert Alamo est sit cliquey dolor do met sent.
@@ -376,12 +521,16 @@ function ProductDetailPage({
 
       <section className="related-products">
         <h2>Bestseller Products</h2>
+        <div className="api-state" aria-live="polite">
+          {isBestsellerProductsLoading && 'Loading bestseller products...'}
+          {isBestsellerProductsError && 'Bestseller products are unavailable.'}
+        </div>
         <div className="related-grid">
-          {relatedProducts.map((product, index) => (
+          {bestsellerProducts.map(({ product, image }) => (
             <ProductCard
-              key={`${product.id}-${index}`}
+              key={product.id}
               product={product}
-              image={relatedImages[index]}
+              image={image}
               onSelect={onSelectProduct}
             />
           ))}
@@ -406,25 +555,33 @@ function CartPage({
   onSelectProduct: (selectedProduct: SelectedProduct) => void;
 }) {
   const dispatch = useAppDispatch();
+  const {
+    data: userCartsData,
+    isLoading: isCartLoading,
+    isError: isCartError,
+  } = useGetCartsByUserQuery(5);
+  const {
+    data: relatedProductsData,
+    isLoading: isRelatedProductsLoading,
+    isError: isRelatedProductsError,
+  } = useGetProductsQuery();
+  const [deleteCart, { data: deletedCart, isLoading: isDeletingCart }] = useDeleteCartMutation();
+  const apiCart = userCartsData?.carts[0];
+  const isApiCartDeleted = Boolean(deletedCart?.isDeleted && deletedCart.id === apiCart?.id);
   const cartItems = useAppSelector((state) => state.cart.items);
+  const hasLocalCartItems = cartItems.length > 0;
+  const visibleCartItems: DisplayCartItem[] = cartItems.map((item) => ({ ...item, source: 'local' }));
   const itemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const displaySubtotal = itemCount > 0 ? subtotal : 26500;
-  const relatedProducts = fallbackProducts.slice(0, 8);
-  const relatedImages = [
-    productSix,
-    productEight,
-    productSeven,
-    productTen,
-    productNine,
-    productFive,
-    productSix,
-    productEight,
-  ];
-  const visibleCartItems =
-    cartItems.length > 0
-      ? cartItems
-      : fallbackProducts.slice(0, 3).map((product) => ({ ...product, quantity: 1 }));
+  const displaySubtotal = subtotal;
+  const displaySubtotalInNaira = displaySubtotal * 462.96;
+  const relatedProducts = (relatedProductsData?.products ?? [])
+    .slice(0, 8)
+    .map((product) => ({
+      product,
+      image: product.thumbnail ?? product.images?.[0],
+    }))
+    .filter((item): item is { product: Product; image: string } => Boolean(item.image));
 
   return (
     <main className="cart-page">
@@ -444,9 +601,16 @@ function CartPage({
             <span>Quantity</span>
             <span>Price</span>
           </div>
+          <div className="api-state" aria-live="polite">
+            {isCartLoading && 'Loading carts...'}
+            {isCartError && 'Cart API is unavailable.'}
+            {isApiCartDeleted && 'Cart deleted successfully.'}
+          </div>
           <div className="cart-items">
             {visibleCartItems.map((item, index) => {
-              const image = productImages[(item.id - 1) % productImages.length] ?? productOne;
+              const image = item.thumbnail ?? item.images?.[0] ?? productOne;
+              const itemTotal = item.discountedTotal ?? item.total ?? item.price * item.quantity;
+              const canEditItem = item.source === 'local';
 
               return (
                 <article className="cart-row" key={`${item.id}-${index}`}>
@@ -458,6 +622,7 @@ function CartPage({
                       <div className="cart-rating">★ ★ ★ ★ ★ <span>28 Reviews</span></div>
                       <button
                         className="remove-button"
+                        disabled={!canEditItem}
                         onClick={() => dispatch(removeFromCart(item.id))}
                       >
                         □ Remove
@@ -465,26 +630,34 @@ function CartPage({
                     </div>
                   </div>
                   <div className="cart-quantity">
-                    <button onClick={() => dispatch(decreaseQuantity(item.id))}>−</button>
+                    <button
+                      disabled={!canEditItem}
+                      onClick={() => dispatch(decreaseQuantity(item.id))}
+                    >
+                      −
+                    </button>
                     <span>{item.quantity}</span>
                     <button onClick={() => dispatch(addToCart(item))}>+</button>
                   </div>
                   <div className="cart-price">
-                    <strong>₦{(item.price * item.quantity * 462.96).toLocaleString('en-US', {
+                    <strong>₦{(itemTotal * 462.96).toLocaleString('en-US', {
                       maximumFractionDigits: 0,
                     })}</strong>
-                    <span>₦1,000 x {item.quantity} item</span>
+                    <span>${item.price.toFixed(2)} x {item.quantity} item</span>
                   </div>
                 </article>
               );
             })}
+            {visibleCartItems.length === 0 && (
+              <p className="empty-cart">Your cart is empty.</p>
+            )}
           </div>
         </div>
 
         <aside className="order-summary">
           <div className="summary-heading">
             <h2>Order Summary</h2>
-            <span>{itemCount || 4} Items</span>
+            <span>{itemCount} Items</span>
           </div>
           <div className="summary-line">
             <span>Delivery Charges</span>
@@ -492,14 +665,29 @@ function CartPage({
           </div>
           <div className="summary-line">
             <span>Subtotal</span>
-            <strong>₦{displaySubtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
+            <strong>
+              ₦{displaySubtotalInNaira.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            </strong>
           </div>
           <div className="summary-total">
             <span>Total</span>
-            <strong>₦{displaySubtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
+            <strong>
+              ₦{displaySubtotalInNaira.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            </strong>
           </div>
           <small className="tax-note">Excluding Delivery Charges</small>
           <button className="checkout-button">Proceed to Checkout</button>
+          <button
+            className="delete-cart-button"
+            disabled={!apiCart || hasLocalCartItems || isApiCartDeleted || isDeletingCart}
+            onClick={() => {
+              if (apiCart) {
+                deleteCart(apiCart.id);
+              }
+            }}
+          >
+            {isDeletingCart ? 'Deleting Cart...' : 'Delete Cart'}
+          </button>
           <div className="payment-row">
             <span>paystack</span>
             <span>●●</span>
@@ -510,12 +698,16 @@ function CartPage({
 
       <section className="related-products cart-related">
         <h2>Products Related To Items In Your Cart</h2>
+        <div className="api-state" aria-live="polite">
+          {isRelatedProductsLoading && 'Loading related products...'}
+          {isRelatedProductsError && 'Related products are unavailable.'}
+        </div>
         <div className="related-grid">
-          {relatedProducts.map((product, index) => (
+          {relatedProducts.map(({ product, image }) => (
             <ProductCard
-              key={`${product.id}-${index}`}
+              key={product.id}
               product={product}
-              image={relatedImages[index]}
+              image={image}
               onSelect={onSelectProduct}
             />
           ))}
@@ -535,17 +727,17 @@ function ServicesSection() {
       />
       <div className="services-grid">
         <article>
-          <div className="service-icon">◒</div>
+          <img className="service-icon" src={easyWinIcon} alt="" />
           <h3>Easy Wins</h3>
           <p>Get your best looking smile now!</p>
         </article>
         <article>
-          <div className="service-icon">▤</div>
+          <img className="service-icon" src={concreteIcon} alt="" />
           <h3>Concrete</h3>
           <p>Defalcate is most focused in helping you discover your most beautiful smile</p>
         </article>
         <article>
-          <div className="service-icon">↗</div>
+          <img className="service-icon" src={hackGrowthIcon} alt="" />
           <h3>Hack Growth</h3>
           <p>Overcame any hurdle or any other problem.</p>
         </article>
@@ -658,10 +850,14 @@ function Footer() {
 function App() {
   const [pageView, setPageView] = useState<PageView>('landing');
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const showLandingPage = () => {
     setPageView('landing');
     setSelectedProduct(null);
+    setSearchQuery('');
+    setSelectedCategory('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -676,9 +872,38 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setSelectedCategory('');
+    setPageView('landing');
+    setSelectedProduct(null);
+
+    window.requestAnimationFrame(() => {
+      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSearchQuery('');
+    setPageView('landing');
+    setSelectedProduct(null);
+
+    window.requestAnimationFrame(() => {
+      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
   return (
     <div className="page">
-      <Header onHome={showLandingPage} onCart={showCartPage} />
+      <Header
+        onHome={showLandingPage}
+        onCart={showCartPage}
+        searchQuery={searchQuery}
+        selectedCategory={selectedCategory}
+        onSearchChange={handleSearchChange}
+        onCategoryChange={handleCategoryChange}
+      />
       {pageView === 'cart' ? (
         <CartPage onSelectProduct={showProductDetail} />
       ) : pageView === 'detail' && selectedProduct ? (
@@ -690,7 +915,11 @@ function App() {
       ) : (
         <main>
           <CategorySection />
-          <ProductSection onSelectProduct={showProductDetail} />
+          <ProductSection
+            onSelectProduct={showProductDetail}
+            searchQuery={searchQuery}
+            selectedCategory={selectedCategory}
+          />
           <ServicesSection />
           <BlogSection />
           <TestimonialsSection />
